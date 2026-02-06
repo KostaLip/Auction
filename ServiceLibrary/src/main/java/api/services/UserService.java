@@ -21,8 +21,13 @@ public interface UserService {
 	@GetMapping("/users")
 	List<UserDto> getUsers();
 	
+	@GetMapping("/users/emailAuth")
+	ResponseEntity<?> getUserByEmailAuth(@RequestParam String email);
+	
 	@GetMapping("/users/email")
-	ResponseEntity<?> getUserByEmail(@RequestParam String email);
+	ResponseEntity<?> getUserByEmail(@RequestParam String email, 
+			@RequestHeader(value = "X-Auth-Role") Role role, 
+			@RequestHeader(value = "X-Auth-Email") String currentEmail);
 	
 	@PostMapping("/users/newAdmin")
 	ResponseEntity<?> createAdmin(@RequestBody UserDto dto);
@@ -32,7 +37,8 @@ public interface UserService {
 	
 	@PutMapping("/users")
 	ResponseEntity<?> updateUser(@RequestBody UserDto dto, 
-			@RequestHeader(value = "X-Auth-Role") Role role);
+			@RequestHeader(value = "X-Auth-Role") Role role, 
+			@RequestHeader(value = "X-Auth-Email") String currentEmail);
 	
 	@DeleteMapping("/users")
 	ResponseEntity<?> deleteUser(@RequestParam String email, 

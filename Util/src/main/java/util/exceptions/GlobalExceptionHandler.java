@@ -16,6 +16,38 @@ public class GlobalExceptionHandler {
 						HttpStatus.NOT_FOUND));
 	}
 	
+	@ExceptionHandler(UnauthorizedException.class)
+	public ResponseEntity<?> handleUnauthorizedException(UnauthorizedException e) {
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+				new ExceptionModel(e.getMessage(), 
+						"Please enter valid email and password of existing user", 
+						HttpStatus.UNAUTHORIZED));
+	}
+	
+	@ExceptionHandler(UserProfileDetailsException.class)
+	public ResponseEntity<?> handleUserProfileDetailsException(UserProfileDetailsException e) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+				new ExceptionModel(e.getMessage(), 
+						"Please enter your email to see profile details", 
+						HttpStatus.FORBIDDEN));
+	}
+	
+	@ExceptionHandler(UserEditAnotherUserException.class)
+	public ResponseEntity<?> handleUserEditAnotherUserException(UserEditAnotherUserException e) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+				new ExceptionModel(e.getMessage(), 
+						"Please enter your email to update your profile", 
+						HttpStatus.FORBIDDEN));
+	}
+	
+	@ExceptionHandler(RoleChangeException.class)
+	public ResponseEntity<?> handleRoleChangeException(RoleChangeException e) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+				new ExceptionModel(e.getMessage(), 
+						"Do not change existing role", 
+						HttpStatus.FORBIDDEN));
+	}
+	
 	@ExceptionHandler(UserAlreadyExistsException.class)
 	public ResponseEntity<?> handleUserAlreadyExistsException(UserAlreadyExistsException e) {
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(
