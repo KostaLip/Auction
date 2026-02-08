@@ -8,7 +8,7 @@
       <version>3.4.2</version> <relativePath/>
     </parent>
 
-    <groupId>soas.service-library</groupId>
+    <groupId>auction.service-library</groupId>
     <artifactId>service-library</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
