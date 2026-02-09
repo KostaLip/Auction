@@ -16,6 +16,24 @@ public class GlobalExceptionHandler {
 						HttpStatus.NOT_FOUND));
 	}
 	
+	@ExceptionHandler(UserBankAccountDetailsException.class)
+	public ResponseEntity<?> handleUserBankAccountDetailsException(
+			UserBankAccountDetailsException e) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+				new ExceptionModel(e.getMessage(), 
+						"Please enter your email to see bank account details", 
+						HttpStatus.FORBIDDEN));
+	}
+	
+	@ExceptionHandler(CurrencyLowerZeroException.class)
+	public ResponseEntity<?> handleCurrencyLowerZeroException(
+			CurrencyLowerZeroException e) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+				new ExceptionModel(e.getMessage(), 
+						"Please enter valid numbers", 
+						HttpStatus.BAD_REQUEST));
+	}
+	
 	@ExceptionHandler(UnauthorizedException.class)
 	public ResponseEntity<?> handleUnauthorizedException(UnauthorizedException e) {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(

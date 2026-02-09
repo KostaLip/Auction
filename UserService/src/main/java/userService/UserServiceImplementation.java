@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import api.dtos.UserDto;
 import api.enums.Role;
+import api.proxies.BankAccountProxy;
 import api.services.UserService;
 import util.exceptions.AdminUserDeletedException;
 import util.exceptions.DeletingOtherUserException;
@@ -28,6 +29,9 @@ public class UserServiceImplementation implements UserService{
 	
 	@Autowired
 	private BCryptPasswordEncoder encoder;
+	
+	@Autowired
+	private BankAccountProxy bankAccountProxy;
 	
 	@Override
 	public List<UserDto> getUsers() {
@@ -97,6 +101,8 @@ public class UserServiceImplementation implements UserService{
 	    UserModel model = convertUserDtoToModel(dto);
 	    UserModel saved = repo.save(model);
 	    
+	    bankAccountProxy.createBankAccount(dto.getEmail());
+	    
 	    return ResponseEntity.status(HttpStatus.CREATED)
 	        .body(convertUserModelToDto(saved));
 	}
@@ -134,6 +140,8 @@ public class UserServiceImplementation implements UserService{
 			}
 			
 			repo.delete(user);
+			bankAccountProxy.deleteBankAccount(email);
+			
 			return ResponseEntity.status(HttpStatus.OK).body(String.format(
 					"User with email: %s, has been successfully deleted", email));
 		} else {
