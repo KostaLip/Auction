@@ -47,6 +47,13 @@ public class ProductModel implements Serializable{
         this.name = name;
         this.description = description;
 	}
+	
+	public ProductModel(int id, String ownerEmail, String name, String description) {
+		this.id = id;
+		this.ownerEmail = ownerEmail;
+        this.name = name;
+        this.description = description;
+	}
 
 	public int getId() {
 		return id;

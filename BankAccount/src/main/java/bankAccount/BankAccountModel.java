@@ -20,7 +20,7 @@ public class BankAccountModel implements Serializable{
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Bank_Account_SEQ_GENERATOR")
 	private int id;
 	
-	@Column(unique = true)
+	@Column(unique = true, nullable = false)
 	private String email;
 
 	private BigDecimal usdAmount;

@@ -16,6 +16,14 @@ public class GlobalExceptionHandler {
 						HttpStatus.NOT_FOUND));
 	}
 	
+	@ExceptionHandler(ProductNotFoundException.class)
+	public ResponseEntity<?> handleProductNotFoundException(ProductNotFoundException e) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+				new ExceptionModel(e.getMessage(), 
+						"Please enter id of existing product", 
+						HttpStatus.NOT_FOUND));
+	}
+	
 	@ExceptionHandler(UserBankAccountDetailsException.class)
 	public ResponseEntity<?> handleUserBankAccountDetailsException(
 			UserBankAccountDetailsException e) {
@@ -55,6 +63,14 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
 				new ExceptionModel(e.getMessage(), 
 						"Please enter your email to update your profile", 
+						HttpStatus.FORBIDDEN));
+	}
+	
+	@ExceptionHandler(CreateProductUserException.class)
+	public ResponseEntity<?> handleCreateProductUserException(CreateProductUserException e) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+				new ExceptionModel(e.getMessage(), 
+						"Please enter your email to create/update/delete your product", 
 						HttpStatus.FORBIDDEN));
 	}
 	

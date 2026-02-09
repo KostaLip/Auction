@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import api.dtos.UserDto;
@@ -146,6 +148,12 @@ public class UserServiceImplementation implements UserService{
 					"User with email: %s, has been successfully deleted", email));
 		} else {
 			throw new UserNotFoundException("User with provided email does not exist");		}
+	}
+	
+	@GetMapping("/internal/users/exists")
+	public ResponseEntity<Boolean> checkUserExists(@RequestParam String email) {
+	    boolean exists = repo.existsByEmail(email);
+	    return ResponseEntity.ok(exists);
 	}
 	
 	public UserDto convertUserModelToDto(UserModel model) {

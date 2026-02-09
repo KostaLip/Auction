@@ -13,4 +13,7 @@ public interface UserProxy {
 	@GetMapping("/users/emailAuth")
 	ResponseEntity<UserDto> getUserByEmailAuth(@RequestParam String email);
 	
+	@GetMapping("/internal/users/exists")
+    ResponseEntity<Boolean> checkUserExists(@RequestParam String email);
+	
 }
