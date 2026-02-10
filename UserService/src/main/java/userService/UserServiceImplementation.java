@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import api.dtos.UserDto;
 import api.enums.Role;
 import api.proxies.BankAccountProxy;
+import api.proxies.ProductProxy;
 import api.services.UserService;
 import util.exceptions.AdminUserDeletedException;
 import util.exceptions.DeletingOtherUserException;
 import util.exceptions.RoleChangeException;
 import util.exceptions.UserAlreadyExistsException;
 import util.exceptions.UserEditAnotherUserException;
+import util.exceptions.UserHasProductsException;
 import util.exceptions.UserNotFoundException;
 import util.exceptions.UserProfileDetailsException;
 
@@ -34,6 +36,9 @@ public class UserServiceImplementation implements UserService{
 	
 	@Autowired
 	private BankAccountProxy bankAccountProxy;
+	
+	@Autowired
+	private ProductProxy productProxy;
 	
 	@Override
 	public List<UserDto> getUsers() {
@@ -139,6 +144,11 @@ public class UserServiceImplementation implements UserService{
 				throw new AdminUserDeletedException("ADMIN users can not be deleted");
 			} else if(role.equals(Role.USER) && !currentUser.getEmail().equals(email)) {
 				throw new DeletingOtherUserException("You can not delete other users accounts");
+			}
+			
+			List<?> products = (List<?>) productProxy.getProductsByEmail(email).getBody();
+			if(products != null && !products.isEmpty()) {
+				throw new UserHasProductsException("This user has products");
 			}
 			
 			repo.delete(user);

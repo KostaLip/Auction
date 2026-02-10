@@ -46,8 +46,12 @@ public class ProductServiceImplementation implements ProductService{
 		}
 		
 		List<ProductModel> products = repo.findByOwnerEmail(email);
+		List<ProductDto> dtos = new ArrayList<ProductDto>();
+		for(ProductModel product : products) {
+			dtos.add(convertModelToDto(product));
+		}
 		
-		return ResponseEntity.status(HttpStatus.OK).body(products);
+		return ResponseEntity.status(HttpStatus.OK).body(dtos);
 	}
 
 	@Override
@@ -58,7 +62,7 @@ public class ProductServiceImplementation implements ProductService{
 			throw new ProductNotFoundException("Product with given id does not exist");
 		}
 		
-		return ResponseEntity.status(HttpStatus.OK).body(product);
+		return ResponseEntity.status(HttpStatus.OK).body(convertModelToDto(product.get()));
 	}
 
 	@Override
