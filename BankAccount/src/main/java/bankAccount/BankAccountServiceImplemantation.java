@@ -8,6 +8,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import api.dtos.BankAccountDto;
@@ -84,6 +86,11 @@ public class BankAccountServiceImplemantation implements BankAccountService{
 		return ResponseEntity.status(HttpStatus.OK)
 		        .body(Map.of("message", String.format(
 		            "Bank Account with email: %s, has been successfully deleted", email)));
+	}
+	
+	@GetMapping("/internal/bankAccount/email")
+    public BankAccountDto getBankAccount(@RequestParam String email) {
+		return convertFromModelToDto(repo.findByEmail(email));
 	}
 	
 	private BankAccountDto convertFromModelToDto(BankAccountModel model) {

@@ -26,4 +26,8 @@ public interface AuctionService {
 	@GetMapping("/auctions/email")
 	ResponseEntity<?> getAuctionByEmail(@RequestParam String email);
 	
+	@PostMapping("/auctions/join/id")
+	ResponseEntity<?> joinAuction(@RequestParam int id, 
+			@RequestHeader(value = "X-Auth-Email") String currentEmail);
+	
 }

@@ -101,6 +101,22 @@ public class GlobalExceptionHandler {
 						HttpStatus.BAD_REQUEST));
 	}
 	
+	@ExceptionHandler(ProductOnAuctionException.class)
+	public ResponseEntity<?> handleProductOnAuctionException(ProductOnAuctionException e) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+				new ExceptionModel(e.getMessage(), 
+						"Enter different product id for auction", 
+						HttpStatus.BAD_REQUEST));
+	}
+	
+	@ExceptionHandler(CurrencyDepositException.class)
+	public ResponseEntity<?> handleCurrencyDepositException(CurrencyDepositException e) {
+		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(
+				new ExceptionModel(e.getMessage(), 
+						"Add more currency to your bank account", 
+						HttpStatus.UNPROCESSABLE_ENTITY));
+	}
+	
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<?> handleJsonParseException(HttpMessageNotReadableException e) {
 	    

@@ -2,7 +2,9 @@ package auctionService.serviceImplementation;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,16 +14,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import api.dtos.AuctionCreateUpdateDto;
 import api.dtos.AuctionDto;
+import api.dtos.AuctionParticipantDto;
+import api.dtos.BankAccountDto;
 import api.dtos.ProductDto;
-import api.enums.Currency;
+import api.proxies.BankAccountProxy;
 import api.proxies.ProductProxy;
 import api.proxies.UserProxy;
 import api.services.AuctionService;
 import auctionService.entity.AuctionModel;
+import auctionService.entity.AuctionParticipantModel;
+import auctionService.repository.AuctionParticipantRepository;
 import auctionService.repository.AuctionRepository;
 import util.exceptions.AuctionNotFoundException;
 import util.exceptions.AuctionOwnerException;
-import util.exceptions.CurrencyNameException;
+import util.exceptions.CurrencyDepositException;
+import util.exceptions.ProductOnAuctionException;
 import util.exceptions.UserEmailAuctionException;
 import util.exceptions.UserNotFoundException;
 
@@ -35,7 +42,15 @@ public class AuctionServiceImplementation implements AuctionService{
 	private AuctionRepository repo;
 	
 	@Autowired
+	private AuctionParticipantRepository participantRepo;
+	
+	@Autowired
 	private UserProxy userProxy;
+	
+	@Autowired
+	private BankAccountProxy bankAccountProxy;
+	
+	BigDecimal percentage = new BigDecimal("0.10");
 
 	@Override
 	public ResponseEntity<?> createAuction(AuctionCreateUpdateDto dto, String currentEmail) {
@@ -55,6 +70,14 @@ public class AuctionServiceImplementation implements AuctionService{
 		if(!currentEmail.equals(product.getOwnerEmail())) {
 			throw new AuctionOwnerException(
 					"You can not create auctions for products that do not belong to you");
+		}
+		
+		List<AuctionDto> auctions = (List<AuctionDto>) getAuctions().getBody();
+		
+		for(AuctionDto auction : auctions) {
+			if(auction.getProductId() == dto.getProductId()) {
+				throw new ProductOnAuctionException("This product is already on auction");
+			}
 		}
 		
 		AuctionModel model = new AuctionModel(dto.getProductId(), dto.getOwnerEmail(), 
@@ -109,4 +132,74 @@ public class AuctionServiceImplementation implements AuctionService{
 				model.getCurrentWinnerEmail(), model.getCreatedAt(), model.getClosedAt());
 	}
 
+	@Override
+	public ResponseEntity<?> joinAuction(int id, String currentEmail) {
+		Optional<AuctionModel> auction = repo.findById(id);
+		
+		if(auction.isEmpty()) {
+			throw new AuctionNotFoundException("Auction with given id does not exist");
+		}
+		
+		if(auction.get().getOwnerEmail().equals(currentEmail)) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+					"You are owner of this auction");
+		}
+		
+		List<AuctionParticipantModel> auctionParticipants = participantRepo.findAll();
+		for(AuctionParticipantModel participant : auctionParticipants) {
+			if(participant.getAuctionId() == id && currentEmail.equals(participant.getParticipantEmail())) {
+				return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(
+						"You have already joined to this auction");
+			}
+		}
+		
+		BigDecimal auctionStartPrice = auction.get().getStartPrice();
+		BigDecimal deposit = auctionStartPrice.multiply(percentage);
+		
+		BankAccountDto bankAccount = bankAccountProxy.getBankAccount(currentEmail);
+		BankAccountDto responseAccount = new BankAccountDto(bankAccount.getEmail(), 
+				bankAccount.getUsdAmount(), bankAccount.getEurAmount(), bankAccount.getRsdAmount());
+		
+		switch(auction.get().getCurrency()) {
+		case EUR -> {
+			if(deposit.compareTo(bankAccount.getEurAmount()) > 0) {
+				throw new CurrencyDepositException("You do not have enough currency amount");
+			}
+			bankAccount.setEurAmount(bankAccount.getEurAmount().subtract(deposit));
+		}
+		case USD -> {
+			if(deposit.compareTo(bankAccount.getUsdAmount()) > 0) {
+				throw new CurrencyDepositException("You do not have enough currency amount");
+			}
+			bankAccount.setUsdAmount(bankAccount.getUsdAmount().subtract(deposit));
+		}
+		case RSD -> {
+			if(deposit.compareTo(bankAccount.getRsdAmount()) > 0) {
+				throw new CurrencyDepositException("You do not have enough currency amount");
+			}
+			bankAccount.setRsdAmount(bankAccount.getRsdAmount().subtract(deposit));
+		}
+		}
+		
+		AuctionParticipantModel auctionParticipant = new AuctionParticipantModel(id, currentEmail, deposit);
+		AuctionParticipantModel saved = participantRepo.save(auctionParticipant);
+		AuctionParticipantDto dto = convertFromModelToDto(saved);
+		
+		Map<String, Object> response = new HashMap<>();
+		
+		bankAccountProxy.updateBankAccount(bankAccount);
+		
+		response.put("Bank Account before deposit", responseAccount);
+		response.put("Bank Account after deposit", bankAccount);
+		response.put("Auction Participant", dto);
+		
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		
+	}
+
+	private AuctionParticipantDto convertFromModelToDto(AuctionParticipantModel model) {
+		return new AuctionParticipantDto(model.getAuctionId(), model.getParticipantEmail(), 
+				model.getDeposit(), model.getJoinedAt());
+	}
+	
 }
