@@ -109,6 +109,30 @@ public class GlobalExceptionHandler {
 						HttpStatus.BAD_REQUEST));
 	}
 	
+	@ExceptionHandler(UserNotPartOfAuctionException.class)
+	public ResponseEntity<?> handleUserNotPartOfAuctionException(UserNotPartOfAuctionException e) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+				new ExceptionModel(e.getMessage(), 
+						"First you need to join in auction and pay deposit", 
+						HttpStatus.BAD_REQUEST));
+	}
+	
+	@ExceptionHandler(NotEnoughCurrencyAmountException.class)
+	public ResponseEntity<?> handleNotEnoughCurrencyAmountException(NotEnoughCurrencyAmountException e) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+				new ExceptionModel(e.getMessage(), 
+						"Fill your bank account with more currency amount", 
+						HttpStatus.BAD_REQUEST));
+	}
+	
+	@ExceptionHandler(HighestBidException.class)
+	public ResponseEntity<?> handleHighestBidException(HighestBidException e) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+				new ExceptionModel(e.getMessage(), 
+						"You need to provide more currency amount then current highest amount", 
+						HttpStatus.BAD_REQUEST));
+	}
+	
 	@ExceptionHandler(CurrencyDepositException.class)
 	public ResponseEntity<?> handleCurrencyDepositException(CurrencyDepositException e) {
 		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(
