@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 import api.enums.Currency;
+import api.enums.Status;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -41,9 +42,12 @@ public class AuctionModel implements Serializable{
 	private Instant createdAt;
 	private Instant closedAt;
 	
+	private Status status;
+	
 	@PrePersist
     void onCreate() {
         createdAt = Instant.now();
+        status = Status.ACTIIVE;
         closedAt = null;
     }
 	
@@ -146,6 +150,14 @@ public class AuctionModel implements Serializable{
 
 	public void setCurrentWinnerEmail(String currentWinnerEmail) {
 		this.currentWinnerEmail = currentWinnerEmail;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 }

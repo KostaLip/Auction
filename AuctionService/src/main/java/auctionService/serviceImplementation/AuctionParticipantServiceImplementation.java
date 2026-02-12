@@ -2,6 +2,7 @@ package auctionService.serviceImplementation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,8 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import api.dtos.AuctionParticipantDto;
 import api.proxies.UserProxy;
 import api.services.AuctionParticipantService;
+import auctionService.entity.AuctionModel;
 import auctionService.entity.AuctionParticipantModel;
 import auctionService.repository.AuctionParticipantRepository;
+import auctionService.repository.AuctionRepository;
+import util.exceptions.AuctionNotFoundException;
 import util.exceptions.UserNotFoundException;
 
 @RestController
@@ -20,6 +24,9 @@ public class AuctionParticipantServiceImplementation implements AuctionParticipa
 
 	@Autowired
 	private AuctionParticipantRepository repo;
+	
+	@Autowired
+	private AuctionRepository auctionRepo;
 	
 	@Autowired
 	private UserProxy userProxy;
@@ -55,6 +62,27 @@ public class AuctionParticipantServiceImplementation implements AuctionParticipa
 		}
 		
 		return dtos;
+	}
+
+	@Override
+	public ResponseEntity<?> getAuctionsParticipantsByAuctionId(int id) {
+		Optional<AuctionModel> auction = auctionRepo.findById(id);
+		if(auction.isEmpty()) {
+			throw new AuctionNotFoundException("Auction with given id does not exist");
+		}
+		
+		List<AuctionParticipantModel> models = repo.findByAuctionId(id);
+		
+		if(models.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.OK).body("This auction does not have participants yet");
+		}
+		
+		List<AuctionParticipantDto> dtos = new ArrayList<AuctionParticipantDto>();
+		for(AuctionParticipantModel model : models) {
+			dtos.add(convertFromModelToDto(model));
+		}
+		
+		return ResponseEntity.status(HttpStatus.OK).body(dtos);
 	}
 	
 	private AuctionParticipantDto convertFromModelToDto(AuctionParticipantModel model) {

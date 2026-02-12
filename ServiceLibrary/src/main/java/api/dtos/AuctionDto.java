@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 import api.enums.Currency;
+import api.enums.Status;
 
 public class AuctionDto {
 	
@@ -16,13 +17,15 @@ public class AuctionDto {
 	private String currentWinnerEmail;
 	private Instant createdAt;
 	private Instant closedAt;
+	private Status status;
 	
 	public AuctionDto() {
 		
 	}
 	
 	public AuctionDto(int id, int productId, String ownerEmail, BigDecimal startPrice, Currency currency,
-			BigDecimal currentHighestBid, String currentWinnerEmail, Instant createdAt, Instant closedAt) {
+			BigDecimal currentHighestBid, String currentWinnerEmail, Instant createdAt, Instant closedAt, 
+			Status status) {
 		super();
 		this.id = id;
 		this.productId = productId;
@@ -33,9 +36,8 @@ public class AuctionDto {
 		this.currentWinnerEmail = currentWinnerEmail;
 		this.createdAt = createdAt;
 		this.closedAt = closedAt;
+		this.status = status;
 	}
-
-
 
 	public int getId() {
 		return id;
@@ -107,6 +109,14 @@ public class AuctionDto {
 	
 	public void setClosedAt(Instant closedAt) {
 		this.closedAt = closedAt;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 }

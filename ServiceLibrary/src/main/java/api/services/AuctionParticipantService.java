@@ -18,4 +18,7 @@ public interface AuctionParticipantService {
 	@GetMapping("/auctions/participant")
 	List<AuctionParticipantDto> getAuctionsParticipants();
 	
+	@GetMapping("/auctions/participant/id")
+	ResponseEntity<?> getAuctionsParticipantsByAuctionId(@RequestParam int id);
+	
 }

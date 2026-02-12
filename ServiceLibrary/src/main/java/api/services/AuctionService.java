@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import api.dtos.AuctionCreateUpdateDto;
+import api.enums.Status;
 
 @Service
 public interface AuctionService {
@@ -19,6 +20,9 @@ public interface AuctionService {
 	
 	@GetMapping("/auctions")
 	ResponseEntity<?> getAuctions();
+	
+	@GetMapping("/auctions/status")
+	ResponseEntity<?> getAuctionsByStatus(@RequestParam Status status);
 	
 	@GetMapping("/auctions/id")
 	ResponseEntity<?> getAuctionById(@RequestParam int id);

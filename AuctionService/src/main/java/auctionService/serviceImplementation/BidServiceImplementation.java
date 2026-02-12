@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import api.dtos.BankAccountDto;
 import api.dtos.BidDto;
+import api.enums.Status;
 import api.proxies.BankAccountProxy;
 import api.services.BidService;
 import auctionService.entity.AuctionModel;
@@ -22,6 +23,7 @@ import auctionService.entity.BidModel;
 import auctionService.repository.AuctionParticipantRepository;
 import auctionService.repository.AuctionRepository;
 import auctionService.repository.BidRepository;
+import util.exceptions.AuctionNotActiveException;
 import util.exceptions.AuctionNotFoundException;
 import util.exceptions.HighestBidException;
 import util.exceptions.NotEnoughCurrencyAmountException;
@@ -49,11 +51,12 @@ public class BidServiceImplementation implements BidService{
 				auctionParticipantRepository.findByParticipantEmailAndAuctionId(currentEmail, id);
 		
 		BankAccountDto bankAccount = bankAccountProxy.getBankAccount(currentEmail);
-		BankAccountDto responseAccount = new BankAccountDto(bankAccount.getEmail(), bankAccount.getUsdAmount(), 
-				bankAccount.getEurAmount(), bankAccount.getRsdAmount());
 		
 		if(auction.isEmpty()) {
 			throw new AuctionNotFoundException("Auction with given id does not exist");
+		}
+		if(!auction.get().getStatus().equals(Status.ACTIVE)) {
+			throw new AuctionNotActiveException("This auction is not active");
 		}
 		if(auctionParticipant.isEmpty()) {
 			throw new UserNotPartOfAuctionException("You did not join to this auction");
@@ -61,9 +64,9 @@ public class BidServiceImplementation implements BidService{
 		
 		BigDecimal currentHighestBid = auction.get().getCurrentHighestBid();
 		
-		if(currentHighestBid.compareTo(amount) > 0) {
-			throw new HighestBidException("Provided amount must be higher then current highest bid. Provided amount: " + 
-		amount + ". Current highest bid: " + currentHighestBid);
+		if(currentHighestBid.compareTo(amount) >= 0 || auction.get().getStartPrice().compareTo(amount) >= 0) {
+			throw new HighestBidException("Provided amount must be higher then current highest bid and start price. Provided amount: " + 
+		amount + ". Current highest bid: " + currentHighestBid + ". Start price: " + auction.get().getStartPrice());
 		}
 		
 		switch(auction.get().getCurrency()) {
@@ -72,21 +75,18 @@ public class BidServiceImplementation implements BidService{
 				throw new NotEnoughCurrencyAmountException("You do not have enough USD currency. Current USD amount: " +
 			bankAccount.getUsdAmount());
 			}
-			bankAccount.setUsdAmount(bankAccount.getUsdAmount().subtract(amount));
 		}
 		case RSD -> {
 			if(amount.compareTo(bankAccount.getRsdAmount()) > 0) {
 				throw new NotEnoughCurrencyAmountException("You do not have enough RSD currency. Current RSD amount: " +
 			bankAccount.getRsdAmount());
 			}
-			bankAccount.setRsdAmount(bankAccount.getRsdAmount().subtract(amount));
 		}
 		case EUR -> {
 			if(amount.compareTo(bankAccount.getEurAmount()) > 0) {
 				throw new NotEnoughCurrencyAmountException("You do not have enough EUR currency. Current EUR amount: " +
 			bankAccount.getEurAmount());
 			}
-			bankAccount.setEurAmount(bankAccount.getEurAmount().subtract(amount));
 		}
 		}
 		
@@ -94,12 +94,13 @@ public class BidServiceImplementation implements BidService{
 		BidModel saved = repo.save(bidModel);
 		BidDto dto = convertFromModelToDto(saved);
 		
+		auction.get().setCurrentHighestBid(amount);
+		auction.get().setCurrentWinnerEmail(currentEmail);
+		auctionRepository.save(auction.get());
+		
 		Map<String, Object> response = new HashMap<>();
-		
-		bankAccountProxy.updateBankAccount(bankAccount);
-		
-		response.put("Bank Account before bid", responseAccount);
-		response.put("Bank Account after bid", bankAccount);
+				
+		response.put("Bank Account", bankAccount);
 		response.put("Your BID", dto);
 		
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -107,7 +108,16 @@ public class BidServiceImplementation implements BidService{
 
 	@Override
 	public ResponseEntity<?> getAuctionBids(int id) {
+		Optional<AuctionModel> auction = auctionRepository.findById(id);
+		if(auction.isEmpty()) {
+			throw new AuctionNotFoundException("Auction with given id does not exist");
+		}
+		
 		List<BidModel> models = repo.findByAuctionId(id);
+		if(models.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.OK).body("This auction does not have BIDs yet");
+		}
+		
 		List<BidDto> dtos = new ArrayList<BidDto>();
 		
 		for(BidModel model : models) {

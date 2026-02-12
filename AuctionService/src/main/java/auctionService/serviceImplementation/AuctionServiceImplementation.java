@@ -17,6 +17,7 @@ import api.dtos.AuctionDto;
 import api.dtos.AuctionParticipantDto;
 import api.dtos.BankAccountDto;
 import api.dtos.ProductDto;
+import api.enums.Status;
 import api.proxies.BankAccountProxy;
 import api.proxies.ProductProxy;
 import api.proxies.UserProxy;
@@ -25,6 +26,7 @@ import auctionService.entity.AuctionModel;
 import auctionService.entity.AuctionParticipantModel;
 import auctionService.repository.AuctionParticipantRepository;
 import auctionService.repository.AuctionRepository;
+import util.exceptions.AuctionNotActiveException;
 import util.exceptions.AuctionNotFoundException;
 import util.exceptions.AuctionOwnerException;
 import util.exceptions.CurrencyDepositException;
@@ -129,7 +131,8 @@ public class AuctionServiceImplementation implements AuctionService{
 	private AuctionDto convertFromModelToDto(AuctionModel model) {
 		return new AuctionDto(model.getId(), model.getProductId(), model.getOwnerEmail(), 
 				model.getStartPrice(), model.getCurrency(), model.getCurrentHighestBid(), 
-				model.getCurrentWinnerEmail(), model.getCreatedAt(), model.getClosedAt());
+				model.getCurrentWinnerEmail(), model.getCreatedAt(), model.getClosedAt(), 
+				model.getStatus());
 	}
 
 	@Override
@@ -143,6 +146,10 @@ public class AuctionServiceImplementation implements AuctionService{
 		if(auction.get().getOwnerEmail().equals(currentEmail)) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
 					"You are owner of this auction");
+		}
+		
+		if(!auction.get().getStatus().equals(Status.ACTIVE)) {
+			throw new AuctionNotActiveException("This auction is not active");
 		}
 		
 		List<AuctionParticipantModel> auctionParticipants = participantRepo.findAll();
@@ -197,6 +204,18 @@ public class AuctionServiceImplementation implements AuctionService{
 		
 	}
 
+	@Override
+	public ResponseEntity<?> getAuctionsByStatus(Status status) {
+		List<AuctionModel> models = repo.findByStatus(status);
+		List<AuctionDto> dtos = new ArrayList<AuctionDto>();
+		
+		for(AuctionModel model : models) {
+			dtos.add(convertFromModelToDto(model));
+		}
+		
+		return ResponseEntity.status(HttpStatus.OK).body(dtos);
+	}
+	
 	private AuctionParticipantDto convertFromModelToDto(AuctionParticipantModel model) {
 		return new AuctionParticipantDto(model.getAuctionId(), model.getParticipantEmail(), 
 				model.getDeposit(), model.getJoinedAt());

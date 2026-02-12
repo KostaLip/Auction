@@ -13,5 +13,6 @@ public interface AuctionParticipantRepository extends JpaRepository<AuctionParti
 
 	List<AuctionParticipantModel> findByParticipantEmail(String email);
 	Optional<AuctionParticipantModel> findByParticipantEmailAndAuctionId(String email, int id);
+	List<AuctionParticipantModel> findByAuctionId(int id);
 	
 }

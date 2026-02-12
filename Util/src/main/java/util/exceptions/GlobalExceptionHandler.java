@@ -125,6 +125,14 @@ public class GlobalExceptionHandler {
 						HttpStatus.BAD_REQUEST));
 	}
 	
+	@ExceptionHandler(AuctionNotActiveException.class)
+	public ResponseEntity<?> handleAuctionNotActiveException(AuctionNotActiveException e) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+				new ExceptionModel(e.getMessage(), 
+						"Participate in another auction", 
+						HttpStatus.BAD_REQUEST));
+	}
+	
 	@ExceptionHandler(HighestBidException.class)
 	public ResponseEntity<?> handleHighestBidException(HighestBidException e) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
