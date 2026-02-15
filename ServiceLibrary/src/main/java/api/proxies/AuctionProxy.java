@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import api.enums.Status;
 
-@FeignClient(name = "auction-service", url = "http://localhost:8400")
+/* LOCAL
+@FeignClient(name = "auction-service", url = "http://localhost:8400") */
+@FeignClient(name = "auction-service", url = "http://auction-service:8400")
 public interface AuctionProxy {
 
 	@GetMapping("/auctions/status")

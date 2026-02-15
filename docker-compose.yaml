@@ -1,0 +1,91 @@
+version: '3.7'
+
+services:
+  product-service:
+    image: kostalip/auction:product-service-v1
+    mem_limit: 700m
+    ports:
+      - "8300:8300"
+    networks:
+      - auction-network
+    environment:
+      DB_HOST: postgres
+      DB_NAME: auctionDB
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+    depends_on:
+      - postgres
+
+  user-service:
+    image: kostalip/auction:user-service-v1
+    mem_limit: 700m
+    ports:
+      - "8770:8770"
+    networks:
+      - auction-network
+    environment:
+      DB_HOST: postgres
+      DB_NAME: auctionDB
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+    depends_on:
+      - postgres
+
+  auth-service:
+    image: kostalip/auction:auth-service-v1
+    mem_limit: 700m
+    ports:
+      - "8880:8880"
+    networks:
+      - auction-network
+
+  auction-service:
+    image: kostalip/auction:auction-service-v1
+    mem_limit: 700m
+    ports:
+      - "8400:8400"
+    networks:
+      - auction-network
+    environment:
+      DB_HOST: postgres
+      DB_NAME: auctionDB
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+
+  bank-account:
+    image: kostalip/auction:bank-account-v1
+    mem_limit: 700m
+    ports:
+      - "8200:8200"
+    networks:
+      - auction-network
+    environment:
+      DB_HOST: postgres
+      DB_NAME: auctionDB
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15-alpine
+    networks:
+      - auction-network
+    environment:
+      POSTGRES_DB: auctionDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+networks:
+  auction-network:
+
+volumes:
+  postgres_data:

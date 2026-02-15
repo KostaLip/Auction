@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import api.dtos.BankAccountDto;
 
-@FeignClient(name = "bank-account", url = "http://localhost:8200")
+/* LOCAL
+@FeignClient(name = "bank-account", url = "http://localhost:8200") */
+@FeignClient(name = "bank-account", url = "http://bank-account:8200")
 public interface BankAccountProxy {
 
 	@PostMapping("/bankAccounts")

@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import api.dtos.UserDto;
 
-@FeignClient(name = "user-service", url = "http://localhost:8770")
+/* LOCAL
+@FeignClient(name = "user-service", url = "http://localhost:8770") */
+@FeignClient(name = "user-service", url = "http://user-service:8770")
 public interface UserProxy {
 
 	@GetMapping("/users/emailAuth")

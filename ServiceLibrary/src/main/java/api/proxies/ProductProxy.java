@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import api.dtos.ProductDto;
 
-@FeignClient(name = "product-service", url = "http://localhost:8300")
+/* LOCAL
+@FeignClient(name = "product-service", url = "http://localhost:8300") */
+@FeignClient(name = "product-service", url = "http://product-service:8300")
 public interface ProductProxy {
 
 	@GetMapping("/products/email")
