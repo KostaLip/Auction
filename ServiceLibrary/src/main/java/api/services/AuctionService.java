@@ -34,4 +34,12 @@ public interface AuctionService {
 	ResponseEntity<?> joinAuction(@RequestParam int id, 
 			@RequestHeader(value = "X-Auth-Email") String currentEmail);
 	
+	@PostMapping("/auctions/cancel/id")
+	ResponseEntity<?> cancelAuction(@RequestParam int id, 
+			@RequestHeader(value = "X-Auth-Email") String currentEmail);
+	
+	@PostMapping("/auctions/finish/id")
+	ResponseEntity<?> finishAuction(@RequestParam int id, 
+			@RequestHeader(value = "X-Auth-Email") String currentEmail);
+	
 }

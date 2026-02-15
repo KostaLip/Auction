@@ -73,10 +73,6 @@ public class AuctionParticipantServiceImplementation implements AuctionParticipa
 		
 		List<AuctionParticipantModel> models = repo.findByAuctionId(id);
 		
-		if(models.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.OK).body("This auction does not have participants yet");
-		}
-		
 		List<AuctionParticipantDto> dtos = new ArrayList<AuctionParticipantDto>();
 		for(AuctionParticipantModel model : models) {
 			dtos.add(convertFromModelToDto(model));

@@ -47,7 +47,7 @@ public class AuctionModel implements Serializable{
 	@PrePersist
     void onCreate() {
         createdAt = Instant.now();
-        status = Status.ACTIIVE;
+        status = Status.ACTIVE;
         closedAt = null;
     }
 	

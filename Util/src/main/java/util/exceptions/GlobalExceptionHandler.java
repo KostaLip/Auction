@@ -183,6 +183,14 @@ public class GlobalExceptionHandler {
 						HttpStatus.FORBIDDEN));
 	}
 	
+	@ExceptionHandler(PermissionForbiddenException.class)
+	public ResponseEntity<?> handlePermissionForbiddenException(PermissionForbiddenException e) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+				new ExceptionModel(e.getMessage(), 
+						"Provide valid user with valid role to access this API", 
+						HttpStatus.FORBIDDEN));
+	}
+	
 	@ExceptionHandler(AuctionOwnerException.class)
 	public ResponseEntity<?> handleAuctionOwnerException(AuctionOwnerException e) {
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(

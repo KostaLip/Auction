@@ -1,6 +1,7 @@
 package auctionService.serviceImplementation;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,7 +78,7 @@ public class AuctionServiceImplementation implements AuctionService{
 		List<AuctionDto> auctions = (List<AuctionDto>) getAuctions().getBody();
 		
 		for(AuctionDto auction : auctions) {
-			if(auction.getProductId() == dto.getProductId()) {
+			if(auction.getProductId() == dto.getProductId() && auction.getStatus().equals(Status.ACTIVE)) {
 				throw new ProductOnAuctionException("This product is already on auction");
 			}
 		}
@@ -215,10 +216,166 @@ public class AuctionServiceImplementation implements AuctionService{
 		
 		return ResponseEntity.status(HttpStatus.OK).body(dtos);
 	}
+
+	@Override
+	public ResponseEntity<?> cancelAuction(int id, String currentEmail) {
+		Optional<AuctionModel> auction = repo.findById(id);
+		
+		if(auction.isEmpty()) {
+			throw new AuctionNotFoundException("Auction with given id does not exist");
+		}
+		if(!auction.get().getStatus().equals(Status.ACTIVE)) {
+			throw new AuctionNotActiveException("This auction is not active");
+		}
+		if(!currentEmail.equals(auction.get().getOwnerEmail())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+					"You are not owner of this auction, you must be owner of auction to cancel it.");
+		}
+		
+		List<AuctionParticipantModel> auctionParticipants = participantRepo.findByAuctionId(id);
+		returnDeposit(auctionParticipants, auction);
+		
+		auction.get().setStatus(Status.CANCELLED);
+		auction.get().setClosedAt(Instant.now());
+		
+		Map<String, Object> response = new HashMap<>();
+
+		response.put("message", "Auction has been successfully canceled. All deposits are returned to users");
+		response.put("AUCTION", repo.save(auction.get()));
+		
+		//LOGIKA I METODA ZA ISPISIVANJE U LOG FAJL
+		
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+		
+	}
+
+	@Override
+	public ResponseEntity<?> finishAuction(int id, String currentEmail) {
+		Optional<AuctionModel> auction = repo.findById(id);
+		Map<String, Object> response = new HashMap<>();
+		
+		if(auction.isEmpty()) {
+			throw new AuctionNotFoundException("Auction with given id does not exist");
+		}
+		if(!auction.get().getStatus().equals(Status.ACTIVE)) {
+			throw new AuctionNotActiveException("This auction is not active");
+		}
+		if(!currentEmail.equals(auction.get().getOwnerEmail())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+					"You are not owner of this auction, you must be owner of auction to finish it.");
+		}
+		
+		if(auction.get().getCurrentWinnerEmail().equals("")) {
+			auction.get().setStatus(Status.NO_BIDS);
+			auction.get().setClosedAt(Instant.now());
+			response.put("WINNER", "Auction has been successfully finished, but with no BIDs");
+			response.put("PRODUCT", productProxy.getProductsById(auction.get().getProductId()));
+			response.put("AUCTION", repo.save(auction.get()));
+			
+			return ResponseEntity.status(HttpStatus.OK).body(response);
+		}
+		
+		BankAccountDto winnersBankAccount = bankAccountProxy.getBankAccount(auction.get().getCurrentWinnerEmail());
+		BigDecimal winnerCurrencyAmount = auction.get().getCurrentHighestBid();
+		List<AuctionParticipantModel> auctionParticipants = participantRepo.findByAuctionId(id);
+		
+		Optional<AuctionParticipantModel> winnersParticipant = participantRepo.findByParticipantEmailAndAuctionId(
+				auction.get().getCurrentWinnerEmail(), id);
+		
+		switch(auction.get().getCurrency()) {
+		case EUR -> {
+			if(winnerCurrencyAmount.compareTo(winnersBankAccount.getEurAmount()) > 0) {
+				auctionParticipants.remove(winnersParticipant.get());
+				response.put("WINNER", 
+						"Winner did not have enough currency amount to pay this product, and deposit is not returned to him");
+				returnDeposit(auctionParticipants, auction);
+				response.put("PRODUCT", productProxy.getProductsById(auction.get().getProductId()));
+				auction.get().setStatus(Status.COMPLETED);
+				auction.get().setClosedAt(Instant.now());
+				response.put("AUCTION", repo.save(auction.get()));
+				return ResponseEntity.status(HttpStatus.OK).body(response);
+			} else {
+				winnersBankAccount.setEurAmount(winnersBankAccount.getEurAmount().subtract(winnerCurrencyAmount));
+			}
+		}
+		case USD -> {
+			if(winnerCurrencyAmount.compareTo(winnersBankAccount.getUsdAmount()) > 0) {
+				auctionParticipants.remove(winnersParticipant.get());
+				response.put("WINNER", 
+						"Winner did not have enough currency amount to pay this product, and deposit is not returned to him");
+				returnDeposit(auctionParticipants, auction);
+				response.put("PRODUCT", productProxy.getProductsById(auction.get().getProductId()));
+				auction.get().setStatus(Status.COMPLETED);
+				auction.get().setClosedAt(Instant.now());
+				response.put("AUCTION", repo.save(auction.get()));
+				return ResponseEntity.status(HttpStatus.OK).body(response);
+			} else {
+				winnersBankAccount.setUsdAmount(winnersBankAccount.getUsdAmount().subtract(winnerCurrencyAmount));
+			}
+		}
+		case RSD -> {
+			if(winnerCurrencyAmount.compareTo(winnersBankAccount.getRsdAmount()) > 0) {
+				auctionParticipants.remove(winnersParticipant.get());
+				response.put("WINNER", 
+						"Winner did not have enough currency amount to pay this product, and deposit is not returned to him");
+				returnDeposit(auctionParticipants, auction);
+				response.put("PRODUCT", productProxy.getProductsById(auction.get().getProductId()));
+				auction.get().setStatus(Status.COMPLETED);
+				auction.get().setClosedAt(Instant.now());
+				response.put("AUCTION", repo.save(auction.get()));
+				return ResponseEntity.status(HttpStatus.OK).body(response);
+			} else {
+				winnersBankAccount.setRsdAmount(winnersBankAccount.getRsdAmount().subtract(winnerCurrencyAmount));
+			}
+		}
+		}	
+		
+		returnDeposit(auctionParticipants, auction);
+		response.put("WINNER", auction.get().getCurrentWinnerEmail());
+		bankAccountProxy.updateBankAccount(winnersBankAccount);
+		
+		ProductDto product = productProxy.getProductsById(auction.get().getProductId()).getBody();
+		product.setOwnerEmail(auction.get().getCurrentWinnerEmail());
+		ProductDto updatedProduct = productProxy.updateProductAuction(product);
+		response.put("PRODUCT", updatedProduct);
+		
+		auction.get().setStatus(Status.COMPLETED);
+		auction.get().setClosedAt(Instant.now());
+		response.put("AUCTION", repo.save(auction.get()));
+		
+		//LOGIKA I METODA ZA ISPISIVANJE U LOG FAJL
+		
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+		
+	}
 	
 	private AuctionParticipantDto convertFromModelToDto(AuctionParticipantModel model) {
 		return new AuctionParticipantDto(model.getAuctionId(), model.getParticipantEmail(), 
 				model.getDeposit(), model.getJoinedAt());
+	}
+	
+	private void returnDeposit(List<AuctionParticipantModel> auctionParticipants, Optional<AuctionModel> auction) {
+		for(AuctionParticipantModel auctionParticipant : auctionParticipants) {
+			String participantEmail = auctionParticipant.getParticipantEmail();
+			BankAccountDto bankAccount = bankAccountProxy.getBankAccount(participantEmail);
+			BigDecimal deposit = auctionParticipant.getDeposit();
+			
+			switch(auction.get().getCurrency()) {
+			case USD -> {
+				bankAccount.setUsdAmount(bankAccount.getUsdAmount().add(deposit));
+				bankAccountProxy.updateBankAccount(bankAccount);
+			}
+			case RSD -> {
+				bankAccount.setRsdAmount(bankAccount.getRsdAmount().add(deposit));
+				bankAccountProxy.updateBankAccount(bankAccount);
+			}
+			case EUR -> {
+				bankAccount.setEurAmount(bankAccount.getEurAmount().add(deposit));
+				bankAccountProxy.updateBankAccount(bankAccount);
+			}
+			}
+			
+		}
 	}
 	
 }

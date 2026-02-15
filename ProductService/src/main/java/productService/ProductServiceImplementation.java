@@ -8,10 +8,15 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import api.dtos.AuctionDto;
 import api.dtos.ProductCreateUpdateDto;
 import api.dtos.ProductDto;
+import api.enums.Status;
+import api.proxies.AuctionProxy;
 import api.proxies.UserProxy;
 import api.services.ProductService;
 import util.exceptions.CreateProductUserException;
@@ -26,6 +31,9 @@ public class ProductServiceImplementation implements ProductService{
 	
 	@Autowired
 	private UserProxy userProxy;
+	
+	@Autowired
+	private AuctionProxy auctionProxy;
 	
 	@Override
 	public List<ProductDto> getAllProducts() {
@@ -104,10 +112,26 @@ public class ProductServiceImplementation implements ProductService{
 			throw new CreateProductUserException("You can not delete products for other users");
 		}
 		
+		List<AuctionDto> auctions = (List<AuctionDto>) auctionProxy.getAuctionsByStatus(Status.ACTIVE).getBody();
+		
+		for(AuctionDto auction : auctions) {
+			if(auction.getProductId() == id) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+						"This product is on auction, auction must be canceled before deleting product");
+			}
+		}
+		
 		repo.delete(product.get());
 		return ResponseEntity.status(HttpStatus.OK)
 		        .body(Map.of("message", String.format(
 		            "Product with id: %s, has been successfully deleted", id)));
+	}
+	
+	@PutMapping("/internal/products/update")
+	ProductDto updateProductAuction(@RequestBody ProductDto dto) {
+		repo.updateProduct(dto.getId(), dto.getOwnerEmail(), dto.getName(), dto.getDescription());
+		
+		return dto;
 	}
 	
 	private ProductDto convertModelToDto(ProductModel model) {
