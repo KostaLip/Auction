@@ -25,8 +25,10 @@ import api.proxies.UserProxy;
 import api.services.AuctionService;
 import auctionService.entity.AuctionModel;
 import auctionService.entity.AuctionParticipantModel;
+import auctionService.entity.BidModel;
 import auctionService.repository.AuctionParticipantRepository;
 import auctionService.repository.AuctionRepository;
+import auctionService.repository.BidRepository;
 import util.exceptions.AuctionNotActiveException;
 import util.exceptions.AuctionNotFoundException;
 import util.exceptions.AuctionOwnerException;
@@ -52,6 +54,12 @@ public class AuctionServiceImplementation implements AuctionService{
 	
 	@Autowired
 	private BankAccountProxy bankAccountProxy;
+	
+	@Autowired
+	private BidRepository bidRepo;
+	
+	@Autowired
+	private AuctionLoggerService auctionLogger;
 	
 	BigDecimal percentage = new BigDecimal("0.10");
 
@@ -237,13 +245,14 @@ public class AuctionServiceImplementation implements AuctionService{
 		
 		auction.get().setStatus(Status.CANCELLED);
 		auction.get().setClosedAt(Instant.now());
+	    AuctionModel savedAuction = repo.save(auction.get());
+	    
+	    auctionLogger.logAuctionCancelled(savedAuction, auctionParticipants, "Cancelled by owner");
 		
 		Map<String, Object> response = new HashMap<>();
 
 		response.put("message", "Auction has been successfully canceled. All deposits are returned to users");
-		response.put("AUCTION", repo.save(auction.get()));
-		
-		//LOGIKA I METODA ZA ISPISIVANJE U LOG FAJL
+		response.put("AUCTION", savedAuction);
 		
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 		
@@ -331,6 +340,7 @@ public class AuctionServiceImplementation implements AuctionService{
 		}	
 		
 		returnDeposit(auctionParticipants, auction);
+	    
 		response.put("WINNER", auction.get().getCurrentWinnerEmail());
 		bankAccountProxy.updateBankAccount(winnersBankAccount);
 		
@@ -341,9 +351,13 @@ public class AuctionServiceImplementation implements AuctionService{
 		
 		auction.get().setStatus(Status.COMPLETED);
 		auction.get().setClosedAt(Instant.now());
-		response.put("AUCTION", repo.save(auction.get()));
+	    AuctionModel savedAuction = repo.save(auction.get());
 		
-		//LOGIKA I METODA ZA ISPISIVANJE U LOG FAJL
+		List<BidModel> allBids = bidRepo.findByAuctionId(id);
+	    List<AuctionParticipantModel> participants = participantRepo.findByAuctionId(id);
+	    
+	    auctionLogger.logAuctionCompleted(auction.get(), participants, allBids);
+		response.put("AUCTION", savedAuction);
 		
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 		
