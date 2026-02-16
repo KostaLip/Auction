@@ -1,0 +1,53 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: auction-ingress
+  namespace: auction
+spec:
+  ingressClassName: nginx
+  tls:
+  - secretName: default-server-secret
+    hosts:
+    - auction.local
+  rules:
+  - host: auction.local 
+    http:
+      paths:
+      - path: /users
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 8770
+      - path: /bankAccounts
+        pathType: Prefix
+        backend:
+          service:
+            name: bank-account
+            port:
+              number: 8200
+      - path: /products
+        pathType: Prefix
+        backend:
+          service:
+            name: product-service
+            port:
+              number: 8300
+      - path: /auctions
+        pathType: Prefix
+        backend:
+          service:
+            name: auction-service
+            port:
+              number: 8400
+      - path: /bids
+        pathType: Prefix
+        backend:
+          service:
+            name: auction-service
+            port:
+              number: 8400
+
+
+

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: user-deploy
+  name: user-deploy
+  namespace: auction
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-deploy
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: user-deploy
+    spec:
+      imagePullSecrets:
+      - name: docker-hub-secret
+      containers:
+      - image: kostalip/auction:user-service-v1
+        name: auction
+        ports:
+        - containerPort: 8770
+        env:
+        - name: SERVER_PORT
+          value: "8770"
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: db-configmap
+              key: DB_USER
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: db-configmap
+              key: DB_NAME
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: db-configmap
+              key: DB_PORT
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: db-configmap
+              key: DB_HOST
+        - name: SPRING_SQL_INIT_MODE
+          valueFrom:
+            configMapKeyRef:
+              key: SPRING_SQL_INIT_MODE
+              name: db-configmap
+        - name: SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION
+          valueFrom:
+            configMapKeyRef:
+              key: SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION
+              name: db-configmap
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          valueFrom:
+            configMapKeyRef:
+              key: SPRING_JPA_HIBERNATE_DDL_AUTO
+              name: db-configmap
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-password
+              key: DB_PASS
+
+        resources: {}
+status: {}

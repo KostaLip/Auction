@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: product-deploy
+  name: product-service
+  namespace: auction
+spec:
+  ports:
+  - port: 8300
+    protocol: TCP
+    targetPort: 8300
+  selector:
+    app: product-deploy
+  type: ClusterIP
+status:
+  loadBalancer: {}
