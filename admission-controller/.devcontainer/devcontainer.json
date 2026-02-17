@@ -1,0 +1,14 @@
+{
+  "name": "Python Webhook Dev",
+  "image": "python:3.11-slim",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ]
+    }
+  },
+  "postCreateCommand": "pip install flask kubernetes cryptography",
+  "forwardPorts": [5000]
+}
