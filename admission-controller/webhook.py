@@ -41,16 +41,6 @@ def mutate_pod_spec(pod_spec):
             container['securityContext']['capabilities'] = {}
         container['securityContext']['capabilities']['drop'] = ['ALL']
 
-    for container in pod_spec.get('initContainers', []):
-        if 'securityContext' not in container:
-            container['securityContext'] = {}
-        container['securityContext']['runAsNonRoot'] = True
-        container['securityContext']['runAsUser'] = 7777
-
-        if 'capabilities' not in container['securityContext']:
-            container['securityContext']['capabilities'] = {}
-        container['securityContext']['capabilities']['drop'] = ['ALL']
-
     for container in pod_spec.get('ephemeralContainers', []):
         if 'securityContext' not in container:
             container['securityContext'] = {}

@@ -18,11 +18,29 @@ spec:
       labels:
         app: auction-deploy
     spec:
+      initContainers:
+      - name: fix-permissions
+        image: busybox
+        command: ["sh", "-c", "chown -R 7777:7777 /var/log/auction"]
+        securityContext:
+          runAsUser: 0
+          runAsNonRoot: false
+        volumeMounts:
+        - name: auction-logs
+          mountPath: /var/log/auction
+      volumes:
+      - name: auction-logs
+        hostPath:
+          path: /var/log/auction
+          type: DirectoryOrCreate
       imagePullSecrets:
       - name: docker-hub-secret
       containers:
-      - image: kostalip/auction:auction-service-v1
+      - image: kostalip/auction:auction-service-v2
         name: auction
+        volumeMounts:
+        - name: auction-logs
+          mountPath: /var/log/auction
         ports:
         - containerPort: 8400
         env:

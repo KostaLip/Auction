@@ -20,7 +20,7 @@ import auctionService.entity.BidModel;
 @Service
 public class AuctionLoggerService {
 
-	private static final String LOG_DIR = System.getProperty("user.home") + "/auction-logs/auctions/";
+	private static final String LOG_DIR = "/var/log/auction/auctions/";
 	
 	@Autowired
 	private ProductProxy productProxy;

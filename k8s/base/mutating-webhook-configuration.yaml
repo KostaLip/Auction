@@ -1,0 +1,31 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: "non-root-user-webhook"
+webhooks:
+- name: "non-root-user-webhook.example.com"
+  rules:
+  - apiGroups:   [""]
+    apiVersions: ["v1"]
+    operations:  ["CREATE", "UPDATE"]
+    resources:   ["pods"]
+    scope:       "Namespaced"
+  - apiGroups:   ["apps"]
+    apiVersions: ["v1"]
+    operations:  ["CREATE", "UPDATE"]
+    resources:   ["deployments", "statefulsets", "daemonsets", "replicasets"]
+    scope:       "Namespaced"
+  - apiGroups:   ["batch"]
+    apiVersions: ["v1"]
+    operations:  ["CREATE", "UPDATE"]
+    resources:   ["jobs", "cronjobs"]
+    scope:       "Namespaced"
+  clientConfig:
+    service:
+      namespace: "mutating-webhook"
+      name: "admission-controller"
+      path: "/mutate"
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCakNDQWU2Z0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwdGFXNXAKYTNWaVpVTkJNQjRYRFRJMk1ESXdOREE1TkRFeE0xb1hEVE0yTURJd016QTVOREV4TTFvd0ZURVRNQkVHQTFVRQpBeE1LYldsdWFXdDFZbVZEUVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTjNoCm5aRWZ2V045NzhpREY4MGxIMkhEWGNNOGUyR1lGZkFZNlF1YVZtKzZrclM0b1ZaOHlUSllxOWtsblJIc3k0dS8KQ0hPcktkNytwdU5LdGJJcHR1alVMMUh3N0NpbFVmUndpcmc2YzhUb2RTdlhXL3hZV3A0YWkrZWNqbjgyeFpDWAo1WWtESTU5ZEJhUStrWmc3eWlMSkdDb3p2S1NOV1ZUWkZrUjN1UlFiY25UNy9yLzJYQy92c1VSQU9SeVlmNWJRCml3akFOY1BOV2pTWHhoSmdpdnZzWmlVdDB1c0YwRkNuWjY1LzZmWnNiaG5LMjdSTml6RlBZWTI3MXZHUWJheUwKdmJNRTJpYXpsMWpZRXhCakZPRHRiWlN3VFROSlZ0VkZXdHpGL3JwTHY1eS9rY2wraE5ib3ZSMmtrSXppdW1uQQp5ZS9wSzRXTWdGNGNKcU1Zbkw4Q0F3RUFBYU5oTUY4d0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWRKUVFXCk1CUUdDQ3NHQVFVRkJ3TUNCZ2dyQmdFRkJRY0RBVEFQQmdOVkhSTUJBZjhFQlRBREFRSC9NQjBHQTFVZERnUVcKQkJUMGNEenZkWDdFK01VSEFGcGJ2dWZjNDNKanhEQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFCc2pXV1oxZwpOeVE3bDJ5N0xrVWw0RjZTNXRTS3lMZTlibnpGUHh5Um91WFEwcDF3M2tSTlNzZkhHdElFdFN1bFJVK1k2Q3dzCjJtUi9SSTBEQnNxWGdBZU5zQlh1WGFndWNHZmFCN2JFbkd4cVhjbnQ2VktSM2xFWFhTNFlISEg3UU1yTTVjWUEKMVpoQS9NcEJ0WHhTckJmUTh2R0lGbU52ZURwQTVUUE1mTzc1U1htanUya0xpbkxMcjEvZ0YwV3IxMzJ4cjVsVwpDMmpoQ2FCcjVYRWw1eS9WM0FmRnFNYi92d29aaGdPb0ZwNzZPalUrNmNMWXY5cFJuYVFlT3VvN0N3ZWVmRG85Ckd5TGIrZ3RtaEM5bW0yNHdhT0VuUlNPb3d4RUlTYnNqeGtDMndlOFRUaW5jYTJoOStOb2JWQ1FTR053L2tDYmUKOGxjeXRGSVNURWFEK2c9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  timeoutSeconds: 5

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: auth-deploy
+  name: auth-deploy
+  namespace: auction
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-deploy
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: auth-deploy
+    spec:
+      imagePullSecrets:
+      - name: docker-hub-secret
+      containers:
+      - image: kostalip/auction:auth-service-v3
+        name: auction
+        ports:
+        - containerPort: 8880
+        resources: {}
+status: {}

@@ -75,6 +75,12 @@ public class AuthController {
 	public ResponseEntity<?> validate(@RequestHeader("Authorization") String auth,
 			@RequestHeader("X-Original-URI") String originalUri, 
 			@RequestHeader("X-Original-Method") String originalMethod) {
+		
+		System.out.println("=== HEADERS ===");
+	    System.out.println("Auth: " + auth);
+	    System.out.println("URI: " + originalUri);
+	    System.out.println("Method: " + originalMethod);
+		
 		String base64 = auth.replace("Basic ", "");
         String decoded = new String(Base64.getDecoder().decode(base64));
         String[] parts = decoded.split(":", 2);
@@ -126,6 +132,9 @@ public class AuthController {
 		if (uri.contains("?")) {
 			uri = uri.substring(0, uri.indexOf("?"));
 		}
+		if (uri.endsWith("/") && uri.length() > 1) {
+	        uri = uri.substring(0, uri.length() - 1);
+	    }
 		return uri;
 	}
 	

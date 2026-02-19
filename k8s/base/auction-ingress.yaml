@@ -3,6 +3,12 @@ kind: Ingress
 metadata:
   name: auction-ingress
   namespace: auction
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: "http://auth-service.auction.svc.cluster.local:8880/validate"
+    nginx.ingress.kubernetes.io/auth-method: "POST"
+
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Email,X-Auth-Role"
+
 spec:
   ingressClassName: nginx
   tls:

@@ -18,6 +18,8 @@ spec:
       labels:
         app: postgres
     spec:
+      securityContext:
+        fsGroup: 7777
       volumes:
       - name: db-data-volume
         hostPath:

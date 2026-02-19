@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: admission-controller-deploy
+  name: admission-controller-deploy
+  namespace: mutating-webhook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admission-controller-deploy
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: admission-controller-deploy
+    spec:
+      volumes:
+      - name: certs
+        secret:
+          secretName: webhook-tls-secret
+      imagePullSecrets:
+      - name: docker-hub-secret
+      containers:
+      - image: kostalip/auction:admission-controller-v3
+        name: auction
+        ports:
+        - containerPort: 5000
+          name: target-port
+        volumeMounts:
+        - name: certs
+          mountPath: /certs
+          readOnly: true
+        env:
+        - name: TLS_CERT_PATH
+          value: "/certs/tls.crt"
+        - name: TLS_KEY_PATH
+          value: "/certs/tls.key"
+status: {}
