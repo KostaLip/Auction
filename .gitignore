@@ -1,7 +1,5 @@
 /.metadata/
-k8s/kubernetes-ingress/
-k8s/cert.conf
-k8s/db-password-secret.yaml
-k8s/docker-hub-secret.yaml
-k8s/tls.key
-k8s/tls.crt
+k8s/keys/
+k8s/base/db-password-secret.yaml
+k8s/base/docker-hub-secret.yaml
+k8s/base/webhook-tls-secret.yaml
