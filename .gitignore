@@ -1,5 +1,4 @@
 /.metadata/
 k8s/keys/
-k8s/base/db-password-secret.yaml
-k8s/base/docker-hub-secret.yaml
-k8s/base/webhook-tls-secret.yaml
+k8s/base/secrets
+k8s/overlays/local/secrets
