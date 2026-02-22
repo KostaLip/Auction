@@ -11,9 +11,6 @@ resources:
 - bank-account-deployment.yaml
 - bank-account-service.yaml
 - db-configmap.yaml
-- db-password-secret.yaml
-- docker-hub-secret.yaml
-- kustomization.yaml
 - mutating-webhook-configuration.yaml
 - postgres-service.yaml
 - postgres-test-deployment.yaml
@@ -21,4 +18,7 @@ resources:
 - product-service.yaml
 - user-deployment.yaml
 - user-service.yaml
-- webhook-csr.yaml
+- fluentd-configmap.yaml
+- s3-bucket-configmap.yaml
+- fluentd-daemonset.yaml
+- ./secrets

@@ -130,11 +130,11 @@ public class AuctionLoggerService {
         try {
             java.nio.file.Files.createDirectories(java.nio.file.Paths.get(LOG_DIR));
             
-            String json = objectMapper.writerWithDefaultPrettyPrinter()
-                .writeValueAsString(log);
+            String json = objectMapper.writeValueAsString(log);
             
             try (FileWriter writer = new FileWriter(LOG_DIR + filename)) {
                 writer.write(json);
+                writer.write("\n");
             }
             
         } catch (IOException e) {

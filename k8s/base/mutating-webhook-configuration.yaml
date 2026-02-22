@@ -4,6 +4,9 @@ metadata:
   name: "non-root-user-webhook"
 webhooks:
 - name: "non-root-user-webhook.example.com"
+  namespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: auction
   rules:
   - apiGroups:   [""]
     apiVersions: ["v1"]

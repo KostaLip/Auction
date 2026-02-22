@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+  namespace: kube-system
+  labels:
+    app: fluentd
+spec:
+  selector:
+    matchLabels:
+      name: fluentd
+  template:
+    metadata:
+      labels:
+        name: fluentd
+    spec:
+      initContainers:
+      - name: create-log-dir
+        image: busybox
+        command: ["mkdir", "-p", "/var/log/auction/auctions"]
+        volumeMounts:
+        - name: auction-logs
+          mountPath: /var/log/auction
+      containers:
+      - name: fluentd
+        image: fluent/fluentd-kubernetes-daemonset:v1-debian-s3
+        env:
+        - name: S3_BUCKET_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: s3-bucket-configmap
+              key: S3_BUCKET_NAME
+        - name: S3_BUCKET_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: s3-bucket-configmap
+              key: S3_BUCKET_REGION
+        volumeMounts:
+        - name: fluentd-config
+          mountPath: /fluentd/etc/fluent.conf
+          subPath: fluent.conf
+        - name: auction-logs
+          mountPath: /var/log/auction
+      volumes:
+      - name: fluentd-config
+        configMap:
+          name: fluentd-config
+      - name: auction-logs
+        hostPath:
+          path: /var/log/auction
+          type: DirectoryOrCreate
