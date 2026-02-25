@@ -7,7 +7,6 @@ metadata:
   name: product-deploy
   namespace: auction
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: product-deploy
@@ -48,21 +47,6 @@ spec:
             configMapKeyRef:
               name: db-configmap
               key: DB_HOST
-        - name: SPRING_SQL_INIT_MODE
-          valueFrom:
-            configMapKeyRef:
-              key: SPRING_SQL_INIT_MODE
-              name: db-configmap
-        - name: SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION
-          valueFrom:
-            configMapKeyRef:
-              key: SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION
-              name: db-configmap
-        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
-          valueFrom:
-            configMapKeyRef:
-              key: SPRING_JPA_HIBERNATE_DDL_AUTO
-              name: db-configmap
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:

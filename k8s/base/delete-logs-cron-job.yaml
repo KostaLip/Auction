@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cleanup-auction-logs
+  namespace: kube-system
+spec:
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: cleanup
+            image: busybox
+            command: ["sh", "-c", "find /var/log/auction/auctions -name '*.json' -mmin +10 -delete"]
+            volumeMounts:
+            - mountPath: /var/log/auction
+              name: auction-logs
+          volumes:
+          - hostPath:
+              path: /var/log/auction
+              type: DirectoryOrCreate
+            name: auction-logs
+          restartPolicy: OnFailure

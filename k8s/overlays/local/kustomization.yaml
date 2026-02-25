@@ -1,7 +1,17 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+- postgres-test-deployment.yaml
+- postgres-service.yaml
 - ../../base
 - ./secrets
 patches:
 - path: fluentd-aws-patch.yaml
+- path: metrics-server-patch.yaml
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 1
+  target:
+    kind: Deployment
+    namespace: auction

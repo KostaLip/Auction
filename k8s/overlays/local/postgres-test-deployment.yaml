@@ -25,6 +25,16 @@ spec:
         hostPath:
           path: /db-data
           type: DirectoryOrCreate
+      initContainers:
+      - name: fix-permissions
+        image: busybox
+        command: ["sh", "-c", "chown -R 7777:7777 /var/lib/postgresql/data"]
+        securityContext:
+          runAsUser: 0
+          runAsNonRoot: false
+        volumeMounts:
+        - name: db-data-volume
+          mountPath: /var/lib/postgresql/data
       containers:
       - image: postgres:15-alpine
         name: postgresql

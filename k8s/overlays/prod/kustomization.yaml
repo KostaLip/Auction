@@ -2,3 +2,21 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - ../../base
+- ./hpas
+- prod-high-priority.yaml
+- prod-low-priority.yaml
+patches:
+- target:
+    kind: Deployment
+    name: (auction-deploy|auth-deploy|bank-account-deploy|user-deploy)
+  patch: |-
+    - op: add
+        path: /spec/template/spec/priorityClassName
+        value: prod-high-priority
+- target:
+    kind: Deployment
+    name: product-deploy
+  patch: |-
+    - op: add
+        path: /spec/template/spec/priorityClassName
+        value: prod-low-priority

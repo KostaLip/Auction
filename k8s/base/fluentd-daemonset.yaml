@@ -41,7 +41,13 @@ spec:
           subPath: fluent.conf
         - name: auction-logs
           mountPath: /var/log/auction
+        - name: fluentd-pos
+          mountPath: /var/log/fluentd-auction.pos
       volumes:
+      - name: fluentd-pos
+        hostPath:
+          path: /var/log/fluentd-auction.pos
+          type: FileOrCreate
       - name: fluentd-config
         configMap:
           name: fluentd-config

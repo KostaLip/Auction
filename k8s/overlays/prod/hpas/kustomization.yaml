@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources: 
+- auction-deploy-hpa.yaml
+- auth-deploy-hpa.yaml
+- bank-account-deploy-hpa.yaml
+- product-deploy-hpa.yaml
+- user-deploy-hpa.yaml
