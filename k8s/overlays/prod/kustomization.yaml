@@ -11,12 +11,12 @@ patches:
     name: (auction-deploy|auth-deploy|bank-account-deploy|user-deploy)
   patch: |-
     - op: add
-        path: /spec/template/spec/priorityClassName
-        value: prod-high-priority
+      path: /spec/template/spec/priorityClassName
+      value: prod-high-priority
 - target:
     kind: Deployment
     name: product-deploy
   patch: |-
     - op: add
-        path: /spec/template/spec/priorityClassName
-        value: prod-low-priority
+      path: /spec/template/spec/priorityClassName
+      value: prod-low-priority

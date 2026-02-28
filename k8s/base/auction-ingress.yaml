@@ -4,6 +4,7 @@ metadata:
   name: auction-ingress
   namespace: auction
   annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/auth-url: "http://auth-service.auction.svc.cluster.local:8880/validate"
     nginx.ingress.kubernetes.io/auth-method: "POST"
 
@@ -16,7 +17,7 @@ spec:
     hosts:
     - auction.local
   rules:
-  - host: auction.local 
+  - host: auction.local
     http:
       paths:
       - path: /users

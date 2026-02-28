@@ -7,7 +7,6 @@ resources:
 - ./secrets
 patches:
 - path: fluentd-aws-patch.yaml
-- path: metrics-server-patch.yaml
 - patch: |-
     - op: replace
       path: /spec/replicas
