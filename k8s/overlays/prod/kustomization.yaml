@@ -8,6 +8,23 @@ resources:
 patches:
 - path: db-configmap-patch.yaml
 - target:
+    kind: Ingress
+    name: auction-ingress
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/host
+      value: k8s-nlb-3e71d37f97817c15.elb.eu-central-1.amazonaws.com
+- target:
+    kind: Deplyoment
+    name: (auction-deploy|auth-deploy|bank-account-deploy|user-deploy)
+  patch: |-
+    - op: add
+      path: /spec/template/spec/tolerations
+      value:
+      - key: tier
+        value: high
+        effect: NoSchedule
+- target:
     kind: Deployment
     name: (auction-deploy|auth-deploy|bank-account-deploy|user-deploy)
   patch: |-

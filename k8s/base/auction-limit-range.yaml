@@ -8,6 +8,7 @@ spec:
   - type: Container
     default:
       memory: 512Mi
+      cpu: 500m
     defaultRequest:
       memory: 256Mi
       cpu: 150m

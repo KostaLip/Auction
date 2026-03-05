@@ -17,7 +17,7 @@ spec:
   #  hosts:
   #  - auction.local
   rules:
-  - host: k8s-nlb-37d424058348c7e8.elb.eu-central-1.amazonaws.com
+  - host: localhost
     http:
       paths:
       - path: /users

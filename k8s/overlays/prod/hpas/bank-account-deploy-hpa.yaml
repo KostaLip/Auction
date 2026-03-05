@@ -10,6 +10,11 @@ spec:
     name: bank-account-deploy
   minReplicas: 1
   maxReplicas: 3
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 120
+    scaleDown:
+      stabilizationWindowSeconds: 300
   metrics:
   - type: Resource
     resource:
