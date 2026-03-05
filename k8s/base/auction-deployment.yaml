@@ -35,7 +35,7 @@ spec:
       imagePullSecrets:
       - name: docker-hub-secret
       containers:
-      - image: kostalip/auction:auction-service-v4
+      - image: kostalip/auction:auction-service-v5
         name: auction
         volumeMounts:
         - name: auction-logs

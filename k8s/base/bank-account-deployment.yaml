@@ -20,7 +20,7 @@ spec:
       imagePullSecrets:
       - name: docker-hub-secret
       containers:
-      - image: kostalip/auction:bank-account-v1
+      - image: kostalip/auction:bank-account-v2
         name: auction
         ports:
         - containerPort: 8200

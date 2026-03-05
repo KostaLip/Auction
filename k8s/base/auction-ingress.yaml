@@ -12,12 +12,12 @@ metadata:
 
 spec:
   ingressClassName: nginx
-  tls:
-  - secretName: default-server-secret
-    hosts:
-    - auction.local
+  #tls:
+  #- secretName: default-server-secret
+  #  hosts:
+  #  - auction.local
   rules:
-  - host: auction.local
+  - host: k8s-nlb-37d424058348c7e8.elb.eu-central-1.amazonaws.com
     http:
       paths:
       - path: /users

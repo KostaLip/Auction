@@ -6,6 +6,7 @@ resources:
 - prod-high-priority.yaml
 - prod-low-priority.yaml
 patches:
+- path: db-configmap-patch.yaml
 - target:
     kind: Deployment
     name: (auction-deploy|auth-deploy|bank-account-deploy|user-deploy)
