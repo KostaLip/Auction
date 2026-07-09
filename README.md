@@ -141,6 +141,12 @@ Shared exception-handling library. A single `@ControllerAdvice`-based `GlobalExc
 
 ---
 
+## CI/CD
+
+This project uses **GitHub Actions** for continuous integration. On every push to `main`, a workflow automatically detects which microservice(s) were changed, builds their Docker images, and pushes them to Docker Hub — so only the affected services are rebuilt instead of the entire stack.
+
+Workflow file: [`.github/workflows/docker-build-push.yml`](.github/workflows/docker-build-push.yml)
+
 ## Admission Controller
 
 A Mutating Webhook implemented in Python (Flask). The Kubernetes API server calls it automatically whenever a new pod is created in the `auction` namespace, before the pod is scheduled.
