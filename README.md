@@ -145,7 +145,7 @@ Shared exception-handling library. A single `@ControllerAdvice`-based `GlobalExc
 
 This project uses **GitHub Actions** for continuous integration. On every push to `main`, a workflow automatically detects which microservice(s) were changed, builds their Docker images, and pushes them to Docker Hub — so only the affected services are rebuilt instead of the entire stack.
 
-Workflow file: [`.github/workflows/docker-build-push.yml`](.github/workflows/docker-build-push.yml)
+Workflow file: [`.github/workflows/main-build-push.yml`](.github/workflows/main-build-push.yml)
 
 ## Admission Controller
 
