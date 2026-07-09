@@ -13,7 +13,7 @@ patches:
   patch: |-
     - op: replace
       path: /spec/rules/0/host
-      value: k8s-nlb-3e71d37f97817c15.elb.eu-central-1.amazonaws.com
+      value: k8s-nlb-7c1722ff67a411f0.elb.eu-central-1.amazonaws.com
 - target:
     kind: Deplyoment
     name: (auction-deploy|auth-deploy|bank-account-deploy|user-deploy)
